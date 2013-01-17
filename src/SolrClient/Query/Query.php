@@ -226,7 +226,7 @@ class Query implements \Serializable
      */
     public function setFacet($flag)
     {
-        $this->params['facet'] = ($flag) ? 'on' : 'offF';
+        $this->params['facet'] = ($flag) ? 'on' : 'off';
         return $this;
     }
 
