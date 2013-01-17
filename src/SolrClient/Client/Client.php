@@ -115,6 +115,18 @@ class Client {
         if ($commit)
             $this->commit();
     }
+    
+    /**
+     * Create new query
+     * 
+     * @param string $query
+     * @return Query
+     */
+    public function createQuery($query = '*:*') {
+        $query = new Query($query);
+        $query->setClient($this);
+        return $query;
+    }
 
     /**
      * @param $rawQuery
