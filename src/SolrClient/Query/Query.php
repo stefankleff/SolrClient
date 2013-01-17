@@ -1,6 +1,7 @@
 <?php
 namespace SolrClient\Query;
 use SolrClient\Client\Client;
+use DateTime;
 
 /**
  * Solr Query Builder
@@ -24,6 +25,14 @@ class Query implements \Serializable
      * @var Client
      */
     protected $client;
+
+    /**
+     * Format for formatting date accoring to
+     * 
+     * @see http://lucene.apache.org/solr/4_0_0/solr-core/org/apache/solr/schema/DateField.html
+     * @var string
+     */
+    protected $format = 'Y-m-d\TH:i:s\Z';
 
     /**
      * Constrct object
@@ -87,6 +96,38 @@ class Query implements \Serializable
     }
 
     /**
+     * Set format string for formatting DateTime objects
+     *
+     * @param string $format
+     */
+    public function setTimeFormat($format)
+    {
+        $this->timeFormat = $format;
+    }
+
+    /**
+     * Return format according for formatting DateTime objects
+     *
+     * @return string
+     */
+    public function getTimeFormat()
+    {
+        return $this->timeFormat;
+    }
+
+    /**
+     * Format DateTime object to work with solr
+     *
+     * @param DateTime $date
+     * @return string
+     */
+    protected function formatDate(DateTime $date)
+    {
+        // TODO: Convert to UTC? $date->setTimezone(new DateTimeZone('??'));
+        return $date->format($this->getTimeFormat());
+    }
+
+    /**
      * Add ne field query
      *
      * @param string $field
@@ -96,6 +137,10 @@ class Query implements \Serializable
      */
     public function addFieldQuery($field, $value, $tag = null)
     {
+        if ($value instanceof DateTime) {
+            $value = $this->formatDate($value);
+        }
+        
         $tagPrefix = '';
         $fq = "{$field}:{$value}";
         
@@ -136,11 +181,21 @@ class Query implements \Serializable
      */
     public function addFieldRange($field, $from = '*', $to = '*')
     {
-        if (empty($from))
+        if (empty($from)) {
             $from = '*';
+        }
         
-        if (empty($to))
+        if (empty($to)) {
             $to = '*';
+        }
+        
+        if ($from instanceof DateTime) {
+            $from = $this->formatDate($from);
+        }
+        
+        if ($to instanceof DateTime) {
+            $to = $this->formatDate($to);
+        }
         
         $this->params['fq'][] = "{$field}:[{$from} TO {$to}]";
         return $this;
@@ -271,7 +326,7 @@ class Query implements \Serializable
      */
     public function isFieldFacet($fieldName)
     {
-        return\in_array($fieldName, $this->params['facet.field']);
+        return \in_array($fieldName, $this->params['facet.field']);
     }
 
     /**
