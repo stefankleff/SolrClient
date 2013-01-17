@@ -12,6 +12,9 @@ use DateTime;
 class Query implements \Serializable
 {
 
+    const SORT_ASCENDING = 1;
+    const SORT_DESCENDING = 2;
+    
     /**
      * Query parameters
      *
@@ -204,11 +207,13 @@ class Query implements \Serializable
     /**
      * Sort by
      *
-     * @param type $text
+     * @param string $field
+     * @param string $direction
      * @return Query
      */
-    public function addSort($field)
+    public function addSort($field, $direction = null)
     {
+        $field .= ($direction === self::SORT_ASCENDING) ? ' asc' : ' desc';
         $this->params['sort'][] = $field;
         return $this;
     }
